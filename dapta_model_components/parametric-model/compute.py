@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-import traceback
 import csv
 from math import ceil
 import numpy as np
@@ -21,6 +20,7 @@ def compute(
 
     """Editable compute function."""
 
+    ######### ------- START this can move to component
     run_folder = Path(setup_data["outputs_folder_path"])
     inputs_folder = Path(setup_data["inputs_folder_path"])
     user_input_files = setup_data["user_input_files"]
@@ -29,9 +29,13 @@ def compute(
     for file in user_input_files:
         if not (inputs_folder / file).is_file():
             FileNotFoundError(f"{str(inputs_folder / file)} is not a file.")
-    if not params["airfoil_csv_file"] in user_input_files:
+
+        ######### ------- END this can move to component
+
+    # check input files have been uploaded
+    if not (inputs_folder / params["airfoil_csv_file"]).is_file():
         FileNotFoundError(
-            f"{params['airfoil_csv_file']} needs to be uploaded in user_input_files."
+            f"{params['airfoil_csv_file']} needs to be uploaded in parameters/user_input_files or defined as a component input."
         )
 
     print("Starting user function evaluation.")
@@ -122,69 +126,6 @@ def get_cgx_input_file(geometry, inputs, folder):
         f.write("".join(cgx_commands))
 
     return fdb_geom_file
-
-
-# def get_composite_properties_input(inputs, run_folder):
-#     """write an FEA input file with the composite properties."""
-
-#     if inputs["fea_solver"] == "CALCULIX":
-
-#         # check and update the element type in the mesh input file
-#         str_find = "*ELEMENT, TYPE=S8,"
-#         str_replace = "*ELEMENT, TYPE=S8R,"
-#         _file_find_replace(
-#             file=(run_folder / inputs["mesh_file"]),
-#             find=str_find,
-#             replace_with=str_replace,
-#         )
-
-#         if "filled_sections_flags" in inputs and not isinstance(
-#             inputs["filled_sections_flags"], list
-#         ):
-#             inputs["filled_sections_flags"] = [inputs["filled_sections_flags"]]
-
-#         shell_set_name = inputs["shell_set_name"]
-#         if "filled_sections_flags" in inputs and any(inputs["filled_sections_flags"]):
-
-#             assert (
-#                 isinstance(inputs["airfoil_cut_chord_percentages"], list)
-#                 and len(inputs["airfoil_cut_chord_percentages"]) == 2
-#             ), (
-#                 "if 'filled_sections_flags' is switched on, 'airfoil_cut_chord_percentages'"
-#                 "should be a list of length 2."
-#             )
-
-#             # create separate element sets for shells and solids
-#             str_find = "*ELEMENT, TYPE=S8R, ELSET=Eall"
-#             str_replace = "*ELEMENT, TYPE=S8R, ELSET=SURF"
-#             _file_find_replace(
-#                 file=(run_folder / inputs["mesh_file"]),
-#                 find=str_find,
-#                 replace_with=str_replace,
-#             )
-#             str_find = "*ELEMENT, TYPE=C3D20, ELSET=Eall"
-#             str_replace = "*ELEMENT, TYPE=C3D20, ELSET=CORE"
-#             _file_find_replace(
-#                 file=(run_folder / inputs["mesh_file"]),
-#                 find=str_find,
-#                 replace_with=str_replace,
-#             )
-
-#         # get input file cards for this solver
-#         ccx_commands = _get_ccx_composite_shell_props(
-#             plies=inputs["composite_plies"],
-#             orientations=inputs["orientations"],
-#             layup=inputs["composite_layup"],
-#             shell_set_name=shell_set_name,
-#         )
-#     else:
-#         warnings.warn(
-#             f"Composite properties not implemented for solver option {inputs['fea_solver']}."
-#         )
-
-#     # write string of commands to file
-#     with open(run_folder / inputs["composite_props_file"], "w", encoding="utf-8") as f:
-#         f.write("".join(ccx_commands))
 
 
 ########### Private functions that do not get called directly
@@ -681,43 +622,3 @@ def _get_commands(
     commands.append("quit\n")
 
     return commands
-
-
-# def _get_ccx_composite_shell_props(
-#     plies=None, orientations=None, layup=None, shell_set_name=None
-# ):
-
-#     commands = []
-#     if not shell_set_name:
-#         shell_set_name = {"ribs": "ERIBS", "aero": "EAERO"}
-
-#     # orientation cards
-#     for ori in orientations:
-#         commands.append(f"*ORIENTATION,NAME={ori['id']}\n")
-#         commands.append(", ".join(str(x) for x in [*ori["1"], *ori["2"]]) + "\n")
-
-#     commands.append("** =============== \n")
-#     # shell property
-#     for (key, section_name) in shell_set_name.items():
-#         commands.append(f"*SHELL SECTION,ELSET={section_name},COMPOSITE\n")
-#         for ply in layup[key]:
-#             props = [p for p in plies if p["id"] == ply][0]
-#             commands.append(
-#                 f"{props['thickness']:6f},,{props['material']},{props['orientation']}\n"
-#             )
-
-#     return commands
-
-
-# def _file_find_replace(file, find: str, replace_with: str):
-#     with open(file, "r", encoding="utf-8") as f:
-#         contents = f.readlines()
-
-#     for index, line in enumerate(contents):
-#         if find in line:
-#             contents[index] = line.replace(find, replace_with)
-#             print(f"Find & Replace edited file '{file}' at line {index:d}.")
-#             break
-
-#     with open(file, "w", encoding="utf-8") as f:
-#         f.write("".join(contents))

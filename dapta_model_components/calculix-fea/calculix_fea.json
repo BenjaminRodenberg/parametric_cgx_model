@@ -2,12 +2,12 @@
   "components": [
     {
       "name": "calculix-fea",
-      "api": "calculix-fea:latest",
+      "api": "calculix-fea-comp:latest",
       "options": {},
       "parameters": {
         "output_directory": "outputs",
         "user_input_files": [],
-        "cgx_file": "cgx_infile.fdb",
+        "param_input_files.cgx_file": "cgx_infile.fdb",
         "analysis_file": "ccx_static_tip_shear.inp",
         "mesh_file": "all.msh",
         "filled_sections_flags": false,
@@ -33,7 +33,7 @@
         "composite_props_file": "composite_shell.inp"
       },
       "inputs": {
-        "cgx_file": "default"
+        "param_input_files.cgx_file": "default"
       },
       "outputs": {
         "output_files": "default"

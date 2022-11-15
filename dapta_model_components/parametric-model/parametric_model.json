@@ -19,7 +19,7 @@
         "boundary_conditions": {"fix_lines": [0, 1], "loaded_lines": [5, 6]}
       },
       "outputs": {
-        "output_files": "default"
+        "output_files.cgx_file": "default"
       }
     }
   ],

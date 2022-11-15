@@ -32,7 +32,7 @@ def compute(
     ######### ------- END this can move to component
 
     # check all input files have been uploaded
-    flist = [params["cgx_file"], params["analysis_file"]]
+    flist = [setup_data["param_input_files.cgx_file"], params["analysis_file"]]
     for f in flist:
         if not (inputs_folder / f).is_file():
             FileNotFoundError(
@@ -42,7 +42,7 @@ def compute(
     print("Starting user function evaluation.")
 
     # Generate the ccx input mesh with cgx
-    infile = inputs_folder / params["cgx_file"]
+    infile = inputs_folder / setup_data["param_input_files.cgx_file"]
     execute_cgx(infile, run_folder=run_folder)
     # check output has been saved
     mesh_file_path = run_folder / params["mesh_file"]
@@ -65,11 +65,11 @@ def compute(
     print("Executed CCX FEM analysis.")
 
     # set outputs
-    outputs = {"output_files": [outfile.name]}
+    # outputs = {"output_files": [outfile.name]}
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Executed Calculix finite element analysis."
     print(message)
 
-    return {"message": message, "outputs": outputs}
+    return {"message": message}
 
 
 def get_composite_properties_input(inputs, run_folder):

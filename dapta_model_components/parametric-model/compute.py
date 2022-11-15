@@ -46,12 +46,10 @@ def compute(
     if not cgx_fdb_path.is_file():
         FileNotFoundError(f"{str(cgx_fdb_path)} is not a file.")
 
-    # set outputs
-    outputs = {"output_files": [cgx_fdb_path.name]}
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Created cgx fdb file {cgx_fdb_path.name}."
     print(message)
 
-    return {"message": message, "outputs": outputs}
+    return {"message": message, "output_files.cgx_file": cgx_fdb_path.name}
 
 
 def get_geometry(inputs, run_folder, inputs_folder, plot_flag=False):

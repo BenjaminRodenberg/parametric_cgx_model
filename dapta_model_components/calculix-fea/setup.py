@@ -12,24 +12,12 @@ def setup(
 ):
     """Editable setup function."""
 
-    # set default inputs
-    if inputs:
-        for input_key, input_value in inputs.items():
-            if input_value == "default":
-                tree = input_key.split(".")
-                try:
-                    inputs[input_key] = getFromDict(params, tree)
-                except Exception as e:
-                    print(f"Could not find {input_key} in the input parameters.")
-
-    # initiate output values
-    if outputs:
-        for output in outputs:
-            outputs[output] = None
+    # declare default parameter inputs - overriden by connection data if available
+    param_input_file = params["param_input_files.cgx_file"]
 
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Setup completed."
 
-    return {"message": message, "inputs": inputs, "outputs": outputs}
+    return {"message": message, "param_input_files.cgx_file": param_input_file}
 
 
 def getFromDict(dataDict: dict, mapList: list):

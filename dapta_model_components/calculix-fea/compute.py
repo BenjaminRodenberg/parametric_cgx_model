@@ -1,6 +1,7 @@
 import shutil
 from datetime import datetime
 from pathlib import Path
+from shutil import copy2
 
 from calculix import execute_cgx, execute_fea
 
@@ -42,8 +43,14 @@ def compute(
     print("Starting user function evaluation.")
 
     # Generate the ccx input mesh with cgx
-    infile = inputs_folder / setup_data["param_input_files.cgx_file"]
-    execute_cgx(infile, run_folder=run_folder)
+    infile = copy2(
+        inputs_folder / setup_data["param_input_files.cgx_file"],
+        run_folder / setup_data["param_input_files.cgx_file"],
+    )
+    resp = execute_cgx(infile.name, run_folder=run_folder)
+    with open(run_folder / "cgx.log", "w") as f:
+        f.write(resp)
+
     # check output has been saved
     mesh_file_path = run_folder / params["mesh_file"]
     if not mesh_file_path.is_file():
@@ -53,11 +60,16 @@ def compute(
     # define composite material properties
     if "composite_layup" in params:
         get_composite_properties_input(params, run_folder)
-    print("Created CCX composite properties file.")
+        print("Created CCX composite properties file.")
 
     # run the FEM model analysis
-    infile = inputs_folder / params["analysis_file"]
-    execute_fea(infile, run_folder=run_folder)
+    infile = copy2(
+        inputs_folder / params["analysis_file"], run_folder / params["analysis_file"]
+    )
+    resp = execute_fea(infile.stem, run_folder=run_folder)
+    with open(run_folder / "ccx.log", "w") as f:
+        f.write(resp)
+
     # check output has been saved
     outfile = run_folder / (infile.stem + ".dat")
     if not outfile.is_file():
@@ -92,13 +104,14 @@ def get_composite_properties_input(inputs, run_folder):
     shell_set_name = inputs["shell_set_name"]
     if "filled_sections_flags" in inputs and any(inputs["filled_sections_flags"]):
 
-        assert (
+        if not (
             isinstance(inputs["airfoil_cut_chord_percentages"], list)
             and len(inputs["airfoil_cut_chord_percentages"]) == 2
-        ), (
-            "if 'filled_sections_flags' is switched on, 'airfoil_cut_chord_percentages'"
-            "should be a list of length 2."
-        )
+        ):
+            raise ValueError(
+                "if 'filled_sections_flags' is switched on, 'airfoil_cut_chord_percentages'"
+                "should be a list of length 2."
+            )
 
         # create separate element sets for shells and solids
         str_find = "*ELEMENT, TYPE=S8R, ELSET=Eall"

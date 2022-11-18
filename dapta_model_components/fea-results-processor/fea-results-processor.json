@@ -1,0 +1,26 @@
+{
+  "components": [
+    {
+      "name": "fea-results-processor",
+      "api": "generic-python3-comp:latest",
+      "options": {},
+      "parameters": {
+        "output_directory": "outputs",
+        "user_input_files": [],
+        "param_input_files.analysis_output_file": "ccx_static_tip_shear.dat",
+        "param_input_files.mesh_file": "all.msh",
+        "param_input_files.nodeset_file": "LAST.nam"
+      },
+      "inputs": {
+        "param_input_files.analysis_output_file": "default",
+        "param_input_files.mesh_file": "default",
+        "param_input_files.nodeset_file": "default"
+      }
+    }
+  ],
+  "connections": [],
+  "workflow": {
+    "start": "fea-results-processor",
+    "end": "fea-results-processor"
+  }
+}

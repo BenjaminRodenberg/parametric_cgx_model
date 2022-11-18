@@ -13,8 +13,15 @@ def setup(
     """Editable setup function."""
 
     # declare default parameter inputs - overriden by connection data if available
-    param_input_file = params["param_input_files.cgx_file"]
+    analysis_output_file = params["param_input_files.analysis_output_file"]
+    mesh_file = params["param_input_files.mesh_file"]
+    nodeset_file = params["param_input_files.nodeset_file"]
 
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Setup completed."
 
-    return {"message": message, "param_input_files.cgx_file": param_input_file}
+    return {
+        "message": message,
+        "param_input_files.analysis_output_file": analysis_output_file,
+        "param_input_files.mesh_file": mesh_file,
+        "param_input_files.nodeset_file": nodeset_file,
+    }

@@ -15,27 +15,16 @@ def compute(
     outputs: dict = None,
     partials: dict = None,
     options: dict = None,
-    root_folder: str = None,
+    run_folder: Path = None,
+    inputs_folder: Path = None,
 ):
 
     """Editable compute function."""
 
-    ######### ------- START this can move to component
-    run_folder = Path(setup_data["outputs_folder_path"])
-    inputs_folder = Path(setup_data["inputs_folder_path"])
-    user_input_files = setup_data["user_input_files"]
-    if not run_folder.is_dir():
-        raise IsADirectoryError(f"{str(run_folder)} is not a folder.")
-    for file in user_input_files:
-        if not (inputs_folder / file).is_file():
-            FileNotFoundError(f"{str(inputs_folder / file)} is not a file.")
-
-        ######### ------- END this can move to component
-
     # check input files have been uploaded
     if not (inputs_folder / params["airfoil_csv_file"]).is_file():
-        FileNotFoundError(
-            f"{params['airfoil_csv_file']} needs to be uploaded in parameters/user_input_files or defined as a component input."
+        raise FileNotFoundError(
+            f"{params['airfoil_csv_file']} needs to be uploaded by the user."
         )
 
     print("Starting user function evaluation.")

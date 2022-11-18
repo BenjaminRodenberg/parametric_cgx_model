@@ -15,30 +15,21 @@ def compute(
     outputs: dict = None,
     partials: dict = None,
     options: dict = None,
-    root_folder: str = None,
+    run_folder: Path = None,
+    inputs_folder: Path = None,
 ):
 
     """Editable compute function."""
 
-    ######### ------- START this can move to component
-    run_folder = Path(setup_data["outputs_folder_path"])
-    inputs_folder = Path(setup_data["inputs_folder_path"])
-    user_input_files = setup_data["user_input_files"]
-    if not run_folder.is_dir():
-        raise IsADirectoryError(f"{str(run_folder)} is not a folder.")
-    for file in user_input_files:
-        if not (inputs_folder / file).is_file():
-            FileNotFoundError(f"{str(inputs_folder / file)} is not a file.")
-
-    ######### ------- END this can move to component
-
-    # check all input files have been uploaded
-    flist = [setup_data["param_input_files.cgx_file"], params["analysis_file"]]
-    for f in flist:
-        if not (inputs_folder / f).is_file():
-            FileNotFoundError(
-                f"{str(inputs_folder / f)} needs to be uploaded in parameters/user_input_files or defined as a component input."
-            )
+    # check input files have been uploaded
+    if not (inputs_folder / setup_data["param_input_files.cgx_file"]).is_file():
+        raise FileNotFoundError(
+            f"{setup_data['param_input_files.cgx_file']} param file connection needed from parametric-model component."
+        )
+    if not (inputs_folder / params["analysis_file"]).is_file():
+        raise FileNotFoundError(
+            f"{params['analysis_file']} needs to be uploaded by the user."
+        )
 
     print("Starting user function evaluation.")
 
@@ -142,7 +133,7 @@ def get_composite_properties_input(inputs, run_folder):
         f.write("".join(ccx_commands))
 
 
-######## -------
+########### Private functions that do not get called directly
 
 
 def _file_find_replace(file, find: str, replace_with: str):

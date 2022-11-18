@@ -12,6 +12,15 @@ def setup(
 ):
     """Editable setup function."""
 
+    # set default inputs
+    if inputs:
+        for input_key, input_value in inputs.items():
+            if input_value == "default":
+                try:
+                    inputs[input_key] = params[input_key]
+                except Exception as e:
+                    print(f"Could not find {input_key} in the input parameters.")
+
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Setup completed."
 
-    return {"message": message, "output_files.cgx_file": None}
+    return {"message": message, "inputs": inputs, "output_files.cgx_file": None}

@@ -28,14 +28,22 @@ def compute(
         )
 
     print("Starting user function evaluation.")
-    geometry = get_geometry(params, run_folder, inputs_folder, plot_flag=PLOT_FLAG)
-    cgx_fdb_path = get_cgx_input_file(geometry, params, run_folder)
+    component_inputs = params  # default values
+
+    if inputs:
+        for input_key, input_value in inputs.items():
+            component_inputs[input_key] = input_value
+
+    geometry = get_geometry(
+        component_inputs, run_folder, inputs_folder, plot_flag=PLOT_FLAG
+    )
+    cgx_fdb_path = get_cgx_input_file(geometry, component_inputs, run_folder)
 
     # check output has been saved
     if not cgx_fdb_path.is_file():
         FileNotFoundError(f"{str(cgx_fdb_path)} is not a file.")
 
-    message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Created cgx fdb file {cgx_fdb_path.name}."
+    message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Created cgx fdb file {cgx_fdb_path.name} with span {str(component_inputs['span'])}m."
     print(message)
 
     return {"message": message, "output_files.cgx_file": cgx_fdb_path.name}

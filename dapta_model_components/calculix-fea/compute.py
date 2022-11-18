@@ -72,7 +72,12 @@ def compute(
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Executed Calculix finite element analysis."
     print(message)
 
-    return {"message": message}
+    return {
+        "message": message,
+        "output_files.analysis_output_file": outfile.name,
+        "output_files.mesh_file": "all.msh",
+        "output_files.nodeset_file": "LAST.nam",
+    }
 
 
 def get_composite_properties_input(inputs, run_folder):

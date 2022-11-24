@@ -41,7 +41,7 @@ def compute(
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Completed fea output processing: \n{str(outputs)}"
     print(message)
 
-    return {"message": message}
+    return {"message": message, "outputs": outputs}
 
 
 def get_fea_outputs(datfile, mesh_file, folder, node_set_file):

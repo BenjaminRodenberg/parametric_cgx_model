@@ -3,6 +3,9 @@ from datetime import datetime
 from pathlib import Path
 from shutil import copy2
 
+import numpy as np
+from scipy.spatial.transform import Rotation
+
 from calculix import execute_cgx, execute_fea
 
 PLOT_FLAG = True
@@ -50,6 +53,23 @@ def compute(
 
     # define composite material properties
     if "composite_layup" in params:
+
+        fibre_rotation_angles = [key for key in inputs if key.startswith("fibre_rotation_angle")]
+        for angle in fibre_rotation_angles:
+            # rotate a fibre direction in the orientations parameter
+            tree = angle.split(".")
+            id = tree[1]
+            direction = tree[2]
+            ori_index = [ori["id"] == id for ori in params["orientations"]].index(True)
+            params["orientations"][ori_index][direction] = _rotate_vector(
+                angle=float(inputs[angle]),
+                starting=params["orientations"][ori_index][direction],
+                axis=[0.0, 0.0, 1.0],
+            )
+            print(
+                f"Orientation {id} direction {direction} set to {str(params['orientations'][ori_index][direction])}"
+            )
+
         get_composite_properties_input(params, run_folder)
         print("Created CCX composite properties file.")
 
@@ -179,3 +199,10 @@ def _get_ccx_composite_shell_props(
             )
 
     return commands
+
+
+def _rotate_vector(angle, starting, axis):
+    """Rotate a vector about an axis by an angle in degrees."""
+
+    r = Rotation.from_rotvec(angle * np.array(axis), degrees=True)
+    return r.apply(starting)

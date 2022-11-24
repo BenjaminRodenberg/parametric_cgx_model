@@ -36,7 +36,8 @@
         "composite_props_file": "composite_shell.inp"
       },
       "inputs": {
-        "param_input_files.cgx_file": "default"
+        "param_input_files.cgx_file": "default", 
+        "fibre_rotation_angle.ORI_0.1": 0.0
       },
       "outputs": {
         "output_files": "default"

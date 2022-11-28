@@ -24,27 +24,32 @@ def compute(
     study_results = []
     parameter_values = range(0, 50, 5)
 
-    for rotation in parameter_values:
+    if "calculix-fea" in component_inputs:
+        for rotation in parameter_values:
 
-        # update rotation input variable
-        component_inputs["calculix-fea"]["fibre_rotation_angle.ORI_0.1"] = float(
-            rotation
+            # update rotation input variable
+            component_inputs["calculix-fea"]["fibre_rotation_angle.ORI_0.1"] = float(
+                rotation
+            )
+
+            (msg, output) = run_workflow(workflow, component_inputs)
+
+            if not "outputs" in output:
+                raise ValueError(
+                    "Cannot find 'output' dictionary in run_workflow output."
+                )
+
+            study_results.append(output["outputs"])
+        plot_data = _plot_study_results(
+            study_results,
+            x=parameter_values,
+            y=["Uz", "Ry"],
+            saveas=str(run_folder / "results_plot"),
         )
-
+        print(plot_data)
+    else:
         (msg, output) = run_workflow(workflow, component_inputs)
 
-        if not "outputs" in output:
-            raise ValueError("Cannot find 'output' dictionary in run_workflow output.")
-
-        study_results.append(output["outputs"])
-
-    plot_data = _plot_study_results(
-        study_results,
-        x=parameter_values,
-        y=["Uz", "Ry"],
-        saveas=str(run_folder / "results_plot"),
-    )
-    print(plot_data)
     print("Parametric study completed.")
 
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: {msg}"

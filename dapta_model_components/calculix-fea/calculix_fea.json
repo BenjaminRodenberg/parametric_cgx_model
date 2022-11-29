@@ -5,7 +5,6 @@
       "api": "calculix-fea-comp:latest",
       "options": {},
       "parameters": {
-        "output_directory": "outputs",
         "user_input_files": [],
         "param_input_files.cgx_file": "cgx_infile.fdb",
         "analysis_file": "ccx_static_tip_shear.inp",

@@ -30,10 +30,27 @@ def compute(
     # 1) define the simulation components
     prob = om.Problem()
     for component in workflow:
+        if "ExplicitComponents" in setup_data:
+            kwargs = [
+                comp["kwargs"]
+                for comp in setup_data["ExplicitComponents"]
+                if comp["name"] == component
+            ][0]
+        else:
+            kwargs = {}
         prob.model.add_subsystem(
-            component,
-            OMexplicitComp(name=component, run_number=0),
+            component, OMexplicitComp(name=component, run_number=0), **kwargs
         )
+    if "ExecComps" in setup_data and setup_data["ExecComps"]:
+        for component in setup_data["ExecComps"]:
+            prob.model.add_subsystem(
+                component["name"],
+                om.ExecComp(component["exprs"]),
+                **component["kwargs"],
+            )
+            if "connections" in component:
+                for c in component["connections"]:
+                    prob.model.connect(c["src"], c["target"])
 
     # 2) define the component connections
     for connection in all_connections:
@@ -70,14 +87,20 @@ def compute(
 
     # 4) add design variables
     for var in setup_data["input_variables"]:
-        comp = var["component"]
-        lower = var["lower"]
         upper = var["upper"]
-        prob.model.add_design_var(
-            f"{comp}.{var['name'].replace('.', '-')}",
-            lower=lower,
-            upper=upper,
-        )
+        lower = var["lower"]
+        if "component" in var:
+            comp = var["component"]
+            prob.model.add_design_var(
+                f"{comp}.{var['name'].replace('.', '-')}",
+                lower=lower,
+                upper=upper,
+            )
+        else:
+            prob.model.add_design_var(
+                var["name"].replace(".", "-"), lower=lower, upper=upper
+            )
+            prob.model.set_input_defaults(var["name"].replace(".", "-"), var["value"])
 
     # 5) add an objective and constraints
     for var in setup_data["output_variables"]:
@@ -191,16 +214,19 @@ def run_optimisation(prob, setup_data, run_folder):
     opt_output = {}
     # print("Completed model optimisation - solution is: \n inputs= (")
     for var in setup_data["input_variables"]:
-        comp = var["component"]
         name = var["name"]
         # print(
         #     f"{comp}.{name}: "
         #     + str(prob.get_val(f"{comp}.{name.replace('.', '-')}"))
         #     + " "
         # )
-        opt_output[f"{comp}.{name}"] = prob.get_val(
-            f"{comp}.{name.replace('.', '-')}"
-        ).tolist()
+        if "component" in var:
+            comp = var["component"]
+            opt_output[f"{comp}.{name}"] = prob.get_val(
+                f"{comp}.{name.replace('.', '-')}"
+            ).tolist()
+        else:
+            opt_output[name] = prob.get_val(name.replace(".", "-")).tolist()
     # print("), \n outputs = (")
     for var in setup_data["output_variables"]:
         comp = var["component"]

@@ -22,15 +22,18 @@ def compute(
     component_inputs = setup_data["component_inputs"]  # note: params not accessible
 
     study_results = []
-    parameter_values = range(0, 50, 5)
+    parameter_values = []
+    rotation_min = float(setup_data["rotation_min"])
+    rotation_inc = float(setup_data["rotation_inc"])
+    rotation_max = float(setup_data["rotation_max"])
 
     if "calculix-fea" in component_inputs:
-        for rotation in parameter_values:
+        rotation = rotation_min
+        while rotation <= rotation_max:
 
             # update rotation input variable
-            component_inputs["calculix-fea"]["fibre_rotation_angle.ORI_0.1"] = float(
-                rotation
-            )
+            print(rotation)
+            component_inputs["calculix-fea"]["fibre_rotation_angle.ORI_0.1"] = rotation
 
             (msg, output) = run_workflow(workflow, component_inputs)
 
@@ -40,6 +43,9 @@ def compute(
                 )
 
             study_results.append(output["outputs"])
+            parameter_values.append(rotation)
+            rotation += rotation_inc
+
         plot_data = _plot_study_results(
             study_results,
             x=parameter_values,

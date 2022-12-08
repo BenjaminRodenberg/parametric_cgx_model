@@ -76,7 +76,7 @@ def compute(
         if "approx_totals" in setup_data and setup_data["approx_totals"]:
             # ensure FD gradients are used
             prob.model.approx_totals(
-                method="fd", step=0.0001, form=None, step_calc=None
+                method="fd", step=setup_data["fd_step"], form=None, step_calc=None
             )
 
     elif setup_data["driver"]["type"] == "doe":

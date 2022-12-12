@@ -24,8 +24,8 @@ class OMexplicitComp(om.ExplicitComponent):
 
         message = {"component": self.name}
         _, component_dict = call_setup(message)
-        inputs = component_dict["input_data"]
-        outputs = component_dict["output_data"]
+        inputs = component_dict["input_data"]["design"]
+        outputs = component_dict["output_data"]["design"]
 
         # initialise the inputs
         if inputs:
@@ -66,7 +66,7 @@ class OMexplicitComp(om.ExplicitComponent):
 
         # calculate the outputs
         # Note: transform all np.ndarrays into nested lists to allow formatting to json
-        input_dict = reformat_inputs(inputs._copy_views())
+        input_dict = {"design": reformat_inputs(inputs._copy_views())}
 
         message = {
             "component": self.name,
@@ -86,7 +86,7 @@ class OMexplicitComp(om.ExplicitComponent):
             print(tb)
             raise ValueError(f"OM Explicit component {self.name} compute error: " + tb)
 
-        val_outputs = data["outputs"]
+        val_outputs = data["outputs"]["design"]
 
         # OpenMDAO doesn't like the outputs dictionary to be overwritten, so
         # assign individual outputs one at a time instead

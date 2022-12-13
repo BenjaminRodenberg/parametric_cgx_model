@@ -9,29 +9,28 @@ PLOT_FLAG = True
 
 
 def compute(
-    setup_data: dict = None,
-    params: dict = None,
     inputs: dict = None,
     outputs: dict = None,
     partials: dict = None,
     options: dict = None,
-    run_folder: Path = None,
-    inputs_folder: Path = None,
+    parameters: dict = None,
 ):
 
     """Editable compute function."""
 
     # check input files have been uploaded
-    if not (inputs_folder / params["airfoil_csv_file"]).is_file():
+    inputs_folder = Path(parameters["inputs_folder_path"])
+    if not (inputs_folder / parameters["airfoil_csv_file"]).is_file():
         raise FileNotFoundError(
-            f"{params['airfoil_csv_file']} needs to be uploaded by the user."
+            f"{parameters['airfoil_csv_file']} needs to be uploaded by the user."
         )
 
     print("Starting user function evaluation.")
-    component_inputs = params  # default values
+    component_inputs = parameters  # default values
+    run_folder = Path(parameters["outputs_folder_path"])
 
     if inputs:
-        for input_key, input_value in inputs.items():
+        for input_key, input_value in inputs["design"].items():
             component_inputs[input_key] = input_value
 
     geometry = get_geometry(
@@ -43,10 +42,12 @@ def compute(
     if not cgx_fdb_path.is_file():
         FileNotFoundError(f"{str(cgx_fdb_path)} is not a file.")
 
+    outputs["implicit"]["files.cgx_file"] = cgx_fdb_path.name
+
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Created cgx fdb file {cgx_fdb_path.name} with span {str(component_inputs['span'])}m."
     print(message)
 
-    return {"message": message, "output_files.cgx_file": cgx_fdb_path.name}
+    return {"message": message, "outputs": outputs}
 
 
 def get_geometry(inputs, run_folder, inputs_folder, plot_flag=False):

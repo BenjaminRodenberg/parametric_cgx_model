@@ -6,33 +6,30 @@ import matplotlib.pyplot as plt
 
 
 def compute(
-    setup_data: dict = None,
-    params: dict = None,
     inputs: dict = None,
     outputs: dict = None,
     partials: dict = None,
     options: dict = None,
-    run_folder: Path = None,
-    inputs_folder: Path = None,
+    parameters: dict = None,
 ):
 
     """Editable compute function."""
 
-    workflow = setup_data["workflow"]
-    component_inputs = setup_data["component_inputs"]  # note: params not accessible
+    workflow = parameters["workflow"]
+    component_inputs = parameters["component_inputs"]  # note: params not accessible
+    run_folder = Path(parameters["outputs_folder_path"])
 
     study_results = []
     parameter_values = []
-    rotation_min = float(setup_data["rotation_min"])
-    rotation_inc = float(setup_data["rotation_inc"])
-    rotation_max = float(setup_data["rotation_max"])
+    rotation_min = float(parameters["rotation_min"])
+    rotation_inc = float(parameters["rotation_inc"])
+    rotation_max = float(parameters["rotation_max"])
 
     if "calculix-fea" in component_inputs:
         rotation = rotation_min
         while rotation <= rotation_max:
 
             # update rotation input variable
-            print(rotation)
             component_inputs["calculix-fea"]["fibre_rotation_angle.ORI_0.1"] = rotation
 
             (msg, output) = run_workflow(workflow, component_inputs)
@@ -42,17 +39,16 @@ def compute(
                     "Cannot find 'output' dictionary in run_workflow output."
                 )
 
-            study_results.append(output["outputs"])
+            study_results.append(output["outputs"]["design"])
             parameter_values.append(rotation)
             rotation += rotation_inc
 
-        plot_data = _plot_study_results(
+        _plot_study_results(
             study_results,
             x=parameter_values,
             y=["Uz", "Ry"],
             saveas=str(run_folder / "results_plot"),
         )
-        print(plot_data)
     else:
         (msg, output) = run_workflow(workflow, component_inputs)
 
@@ -75,11 +71,16 @@ def run_workflow(workflow, component_inputs):
             "get_outputs": True,
         }
         if component in component_inputs:
-            indict["inputs"] = component_inputs[component]
+            indict["inputs"] = {
+                "design": component_inputs[component],
+                "implicit": {},
+                "setup": {},
+            }
         (msg, output) = call_compute(indict)
         print(msg)
         msgs += msg + "\n"
 
+    # only return the last output captured
     return (msgs, output)
 
 

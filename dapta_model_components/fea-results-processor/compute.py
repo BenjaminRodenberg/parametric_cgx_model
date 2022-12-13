@@ -4,23 +4,21 @@ import numpy as np
 
 
 def compute(
-    setup_data: dict = None,
-    params: dict = None,
     inputs: dict = None,
     outputs: dict = None,
     partials: dict = None,
     options: dict = None,
-    run_folder: Path = None,
-    inputs_folder: Path = None,
+    parameters: dict = None,
 ):
 
     """Editable compute function."""
 
-    datfile = setup_data["param_input_files.analysis_output_file"]
-    mesh_file = setup_data["param_input_files.mesh_file"]
-    node_set_file = setup_data["param_input_files.nodeset_file"]
+    datfile = inputs["implicit"]["files.analysis_output_file"]
+    mesh_file = inputs["implicit"]["files.mesh_file"]
+    node_set_file = inputs["implicit"]["files.nodeset_file"]
 
     # check input files have been uploaded
+    inputs_folder = Path(parameters["inputs_folder_path"])
     for f in [datfile, mesh_file, node_set_file]:
         if not (inputs_folder / f).is_file():
             raise FileNotFoundError(
@@ -30,16 +28,13 @@ def compute(
     print("Starting user function evaluation.")
 
     # recover the analysis results
-    outputs = get_fea_outputs(
+    outputs["design"] = get_fea_outputs(
         datfile=datfile,
         mesh_file=mesh_file,
         node_set_file=node_set_file,
         folder=inputs_folder,
     )
-    print(outputs)
-
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Completed fea output processing: \n{str(outputs)}"
-    print(message)
 
     return {"message": message, "outputs": outputs}
 

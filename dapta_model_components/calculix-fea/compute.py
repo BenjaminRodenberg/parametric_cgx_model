@@ -12,70 +12,74 @@ PLOT_FLAG = True
 
 
 def compute(
-    setup_data: dict = None,
-    params: dict = None,
     inputs: dict = None,
     outputs: dict = None,
     partials: dict = None,
     options: dict = None,
-    run_folder: Path = None,
-    inputs_folder: Path = None,
+    parameters: dict = None,
 ):
 
     """Editable compute function."""
 
     # check input files have been uploaded
-    if not (inputs_folder / setup_data["param_input_files.cgx_file"]).is_file():
+    inputs_folder = Path(parameters["inputs_folder_path"])
+    if not (inputs_folder / inputs["implicit"]["files.cgx_file"]).is_file():
         raise FileNotFoundError(
-            f"{setup_data['param_input_files.cgx_file']} param file connection needed from parametric-model component."
+            f"{inputs['implicit']['files.cgx_file']} param file connection needed from parametric-model component."
         )
-    if not (inputs_folder / params["analysis_file"]).is_file():
+    if not (inputs_folder / parameters["analysis_file"]).is_file():
         raise FileNotFoundError(
-            f"{params['analysis_file']} needs to be uploaded by the user."
+            f"{parameters['analysis_file']} needs to be uploaded by the user."
         )
 
     print("Starting user function evaluation.")
 
+    run_folder = Path(parameters["outputs_folder_path"])
     # Generate the ccx input mesh with cgx
     infile = copy2(
-        inputs_folder / setup_data["param_input_files.cgx_file"],
-        run_folder / setup_data["param_input_files.cgx_file"],
+        inputs_folder / inputs["implicit"]["files.cgx_file"],
+        run_folder / inputs["implicit"]["files.cgx_file"],
     )
     resp = execute_cgx(infile.name, run_folder=run_folder)
     with open(run_folder / "cgx.log", "w") as f:
         f.write(resp)
 
     # check output has been saved
-    mesh_file_path = run_folder / params["mesh_file"]
+    mesh_file_path = run_folder / parameters["mesh_file"]
     if not mesh_file_path.is_file():
         FileNotFoundError(f"{str(mesh_file_path)} is not a file.")
     print("Created CCX analysis mesh file with CGX.")
 
     # define composite material properties
-    if "composite_layup" in params:
+    if "composite_layup" in parameters:
 
-        fibre_rotation_angles = [key for key in inputs if key.startswith("fibre_rotation_angle")]
+        fibre_rotation_angles = [
+            key for key in inputs["design"] if key.startswith("fibre_rotation_angle")
+        ]
         for angle in fibre_rotation_angles:
             # rotate a fibre direction in the orientations parameter
             tree = angle.split(".")
             id = tree[1]
             direction = tree[2]
-            ori_index = [ori["id"] == id for ori in params["orientations"]].index(True)
-            params["orientations"][ori_index][direction] = _rotate_vector(
-                angle=float(inputs[angle]),
-                starting=params["orientations"][ori_index][direction],
+            ori_index = [ori["id"] == id for ori in parameters["orientations"]].index(
+                True
+            )
+            parameters["orientations"][ori_index][direction] = _rotate_vector(
+                angle=float(inputs["design"][angle]),
+                starting=parameters["orientations"][ori_index][direction],
                 axis=[0.0, 0.0, 1.0],
             )
             print(
-                f"Orientation {id} direction {direction} set to {str(params['orientations'][ori_index][direction])}"
+                f"Orientation {id} direction {direction} set to {str(parameters['orientations'][ori_index][direction])}"
             )
 
-        get_composite_properties_input(params, run_folder)
+        get_composite_properties_input(parameters, run_folder)
         print("Created CCX composite properties file.")
 
     # run the FEM model analysis
     infile = copy2(
-        inputs_folder / params["analysis_file"], run_folder / params["analysis_file"]
+        inputs_folder / parameters["analysis_file"],
+        run_folder / parameters["analysis_file"],
     )
     resp = execute_fea(infile.stem, run_folder=run_folder)
     with open(run_folder / "ccx.log", "w") as f:
@@ -92,12 +96,11 @@ def compute(
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Executed Calculix finite element analysis."
     print(message)
 
-    return {
-        "message": message,
-        "output_files.analysis_output_file": outfile.name,
-        "output_files.mesh_file": "all.msh",
-        "output_files.nodeset_file": "LAST.nam",
-    }
+    outputs["implicit"]["files.analysis_output_file"] = outfile.name
+    outputs["implicit"]["files.mesh_file"] = "all.msh"
+    outputs["implicit"]["files.nodeset_file"] = "LAST.nam"
+
+    return {"message": message, "outputs": outputs}
 
 
 def get_composite_properties_input(inputs, run_folder):

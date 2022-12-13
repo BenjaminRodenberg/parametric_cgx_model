@@ -6,14 +6,22 @@
       "options": {},
       "parameters": {
         "user_input_files": [],
-        "param_input_files.analysis_output_file": "ccx_static_tip_shear.dat",
-        "param_input_files.mesh_file": "all.msh",
-        "param_input_files.nodeset_file": "LAST.nam"
+        "files.analysis_output_file": "ccx_static_tip_shear.dat",
+        "files.mesh_file": "all.msh",
+        "files.nodeset_file": "LAST.nam"
       },
       "inputs": {
-        "param_input_files.analysis_output_file": "default",
-        "param_input_files.mesh_file": "default",
-        "param_input_files.nodeset_file": "default"
+        "files.analysis_output_file": "default",
+        "files.mesh_file": "default",
+        "files.nodeset_file": "default"
+      },
+      "outputs": {
+        "Ux": "default",
+        "Uy": "default",
+        "Uz": "default",
+        "Rx": "default",
+        "Ry": "default",
+        "Rz": "default"
       }
     }
   ],

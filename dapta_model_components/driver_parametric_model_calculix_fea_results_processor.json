@@ -30,7 +30,7 @@
         }
       },
       "outputs": {
-        "output_files.cgx_file": "default"
+        "files.cgx_file": "default"
       }
     },
     {
@@ -104,13 +104,13 @@
         "composite_props_file": "composite_shell.inp"
       },
       "inputs": {
-        "param_input_files.cgx_file": "default",
+        "files.cgx_file": "default",
         "fibre_rotation_angle.ORI_0.1": 0.0
       },
       "outputs": {
-        "output_files.analysis_output_file": "default",
-        "output_files.mesh_file": "default",
-        "output_files.nodeset_file": "default"
+        "files.analysis_output_file": "default",
+        "files.mesh_file": "default",
+        "files.nodeset_file": "default"
       }
     },
     {
@@ -121,9 +121,17 @@
         "user_input_files": []
       },
       "inputs": {
-        "param_input_files.analysis_output_file": "default",
-        "param_input_files.mesh_file": "default",
-        "param_input_files.nodeset_file": "default"
+        "files.analysis_output_file": "default",
+        "files.mesh_file": "default",
+        "files.nodeset_file": "default"
+      },
+      "outputs": {
+        "Ux": "default",
+        "Uy": "default",
+        "Uz": "default",
+        "Rx": "default",
+        "Ry": "default",
+        "Rz": "default"
       }
     },
     {
@@ -148,31 +156,31 @@
   "connections": [
     {
       "origin": "parametric-model",
-      "name_origin": "output_files.cgx_file",
+      "name_origin": "files.cgx_file",
       "target": "calculix-fea",
-      "name_target": "param_input_files.cgx_file",
-      "type": "param"
+      "name_target": "files.cgx_file",
+      "type": "implicit"
     },
     {
       "origin": "calculix-fea",
-      "name_origin": "output_files.analysis_output_file",
+      "name_origin": "files.analysis_output_file",
       "target": "fea-results-processor",
-      "name_target": "param_input_files.analysis_output_file",
-      "type": "param"
+      "name_target": "files.analysis_output_file",
+      "type": "implicit"
     },
     {
       "origin": "calculix-fea",
-      "name_origin": "output_files.mesh_file",
+      "name_origin": "files.mesh_file",
       "target": "fea-results-processor",
-      "name_target": "param_input_files.mesh_file",
-      "type": "param"
+      "name_target": "files.mesh_file",
+      "type": "implicit"
     },
     {
       "origin": "calculix-fea",
-      "name_origin": "output_files.nodeset_file",
+      "name_origin": "files.nodeset_file",
       "target": "fea-results-processor",
-      "name_target": "param_input_files.nodeset_file",
-      "type": "param"
+      "name_target": "files.nodeset_file",
+      "type": "implicit"
     }
   ],
   "workflow": {

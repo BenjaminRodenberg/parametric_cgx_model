@@ -6,9 +6,7 @@ def setup(
     inputs: dict = None,
     outputs: dict = None,
     partials: dict = None,
-    params: dict = None,
-    run_folder: Path = None,
-    inputs_folder: Path = None,
+    parameters: dict = None,
 ):
     """Editable setup function."""
 
@@ -17,10 +15,10 @@ def setup(
 
     # set default inputs
     if inputs:
-        for input_key, input_value in inputs.items():
+        for input_key, input_value in inputs["design"].items():
             if input_value == "default":
                 try:
-                    inputs[input_key] = params[input_key]
+                    inputs["design"][input_key] = parameters[input_key]
                 except Exception as e:
                     print(f"Could not find {input_key} in the input parameters.")
         response["inputs"] = inputs

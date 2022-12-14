@@ -101,9 +101,15 @@ def create_plot_overlay(unconstrained, constrained):
         ax.lines.pop(1)
 
 
-def make_gif(name, duration):
-    files = sorted(glob.glob(f"paraboloid_*.png"))
-    # print(files)
+def make_gif(name, duration, folder=None, prefix=None):
+    p = ""
+    if folder:
+        p = folder + "/"
+        name = folder + "/" + name
+    if prefix:
+        p = p + prefix
+    files = sorted(glob.glob(p + "*.png"))
+    print(files)
     frames = [Image.open(image) for image in files]
     frame_one = frames[0]
     frame_one.save(
@@ -118,15 +124,16 @@ def make_gif(name, duration):
 
 if __name__ == "__main__":
     # create_rotating_plot(range(0, 360, 10))
-    # make_gif("paraboloid_rotation.gif", duration=150)
-    create_plot_overlay(
-        unconstrained=[
-            [5.0, 5.0],
-            [-4.0, -18.0],
-            [1.64014688, -3.58629131],
-            [7.26960294, -7.78279492],
-            [6.66666667, -7.33333333],
-        ],
-        constrained=[[5.0, 5.0], [7.0, -7.0]],
-    )
-    make_gif("paraboloid_optimisation.gif", duration=600)
+    # make_gif("paraboloid_rotation.gif", duration=150, prefix = "paraboloid_")
+    # create_plot_overlay(
+    #     unconstrained=[
+    #         [5.0, 5.0],
+    #         [-4.0, -18.0],
+    #         [1.64014688, -3.58629131],
+    #         [7.26960294, -7.78279492],
+    #         [6.66666667, -7.33333333],
+    #     ],
+    #     constrained=[[5.0, 5.0], [7.0, -7.0]],
+    # )
+    # make_gif("paraboloid_optimisation.gif", duration=600, prefix = "paraboloid_")
+    make_gif("chained_analysis.gif", folder="../to_gif", duration=600, prefix="")

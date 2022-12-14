@@ -17,7 +17,7 @@ def compute(
     partials: dict = None,
     options: dict = None,
     parameters: dict = None,
-):
+) -> dict:
 
     """Editable compute function."""
 

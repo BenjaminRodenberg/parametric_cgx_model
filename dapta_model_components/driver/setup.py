@@ -7,7 +7,7 @@ def setup(
     outputs: dict = None,
     partials: dict = None,
     parameters: dict = None,
-):
+) -> dict:
     """Editable setup function."""
 
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Setup completed."

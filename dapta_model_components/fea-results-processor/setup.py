@@ -7,7 +7,7 @@ def setup(
     outputs: dict = None,
     partials: dict = None,
     parameters: dict = None,
-):
+) -> dict:
     """Editable setup function."""
 
     # declare default parameter inputs - overriden by connection data if available

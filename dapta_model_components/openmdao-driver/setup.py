@@ -15,10 +15,8 @@ def setup(
 
     if "driver" not in parameters:
         # assume we want to run an optimisation with default settings
-        driver = {"type": "optimisation"}
-    else:
-        driver = parameters["driver"]
+        parameters["driver"] = {"type": "optimisation"}
 
     message = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}: Setup completed."
 
-    return {"message": message, "driver": driver}
+    return {"message": message, "parameters": parameters}
